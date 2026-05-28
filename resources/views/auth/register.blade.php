@@ -1,52 +1,102 @@
-<x-guest-layout>
-    <form method="POST" action="{{ route('register') }}">
-        @csrf
+<?php
+require_once 'includes/config.php';
+require_once 'includes/auth.php';
 
-        <!-- Name -->
-        <div>
-            <x-input-label for="name" :value="__('Name')" />
-            <x-text-input id="name" class="block mt-1 w-full" type="text" name="name" :value="old('name')" required autofocus autocomplete="name" />
-            <x-input-error :messages="$errors->get('name')" class="mt-2" />
+$error = '';
+$success = '';
+
+if (isLoggedIn()) {
+    header('Location: dashboard.php');
+    exit();
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $username = sanitize($_POST['username']);
+    $email = sanitize($_POST['email']);
+    $password = $_POST['password'];
+    $confirm_password = $_POST['confirm_password'];
+    $full_name = sanitize($_POST['full_name']);
+    $school = sanitize($_POST['school']);
+    
+    if ($password !== $confirm_password) {
+        $error = 'Password tidak sama';
+    } elseif (strlen($password) < 6) {
+        $error = 'Password minimal 6 karakter';
+    } else {
+        if (register($username, $email, $password, $full_name, $school)) {
+            $success = 'Registrasi berhasil! Silakan login.';
+        } else {
+            $error = 'Username atau email sudah digunakan';
+        }
+    }
+}
+?>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daftar - <?= SITE_NAME ?></title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-card">
+            <h1 class="auth-title">🔍 <?= SITE_NAME ?></h1>
+            <p class="auth-subtitle">Daftar akun baru</p>
+            
+            <?php if ($error): ?>
+                <div class="alert alert-danger"><?= $error ?></div>
+            <?php endif; ?>
+            
+            <?php if ($success): ?>
+                <div class="alert alert-success"><?= $success ?></div>
+            <?php endif; ?>
+            
+            <form method="POST">
+                <div class="form-group">
+                    <label class="form-label">Username</label>
+                    <input type="text" name="username" class="form-control" required 
+                           placeholder="Masukkan username">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" name="email" class="form-control" required 
+                           placeholder="Masukkan email">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Nama Lengkap</label>
+                    <input type="text" name="full_name" class="form-control" required 
+                           placeholder="Masukkan nama lengkap">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Sekolah</label>
+                    <input type="text" name="school" class="form-control" required 
+                           placeholder="Masukkan nama sekolah">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <input type="password" name="password" class="form-control" required 
+                           placeholder="Minimal 6 karakter">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Konfirmasi Password</label>
+                    <input type="password" name="confirm_password" class="form-control" required 
+                           placeholder="Ulangi password">
+                </div>
+                
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Daftar</button>
+            </form>
+            
+            <p style="text-align: center; margin-top: 1.5rem; color: var(--gray-600);">
+                Sudah punya akun? <a href="login.php" style="color: var(--primary-color); font-weight: 600;">Login</a>
+            </p>
         </div>
-
-        <!-- Email Address -->
-        <div class="mt-4">
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autocomplete="username" />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
-        </div>
-
-        <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
-
-            <x-text-input id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="new-password" />
-
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
-        </div>
-
-        <!-- Confirm Password -->
-        <div class="mt-4">
-            <x-input-label for="password_confirmation" :value="__('Confirm Password')" />
-
-            <x-text-input id="password_confirmation" class="block mt-1 w-full"
-                            type="password"
-                            name="password_confirmation" required autocomplete="new-password" />
-
-            <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
-        </div>
-
-        <div class="flex items-center justify-end mt-4">
-            <a class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800" href="{{ route('login') }}">
-                {{ __('Already registered?') }}
-            </a>
-
-            <x-primary-button class="ms-4">
-                {{ __('Register') }}
-            </x-primary-button>
-        </div>
-    </form>
-</x-guest-layout>
+    </div>
+</body>
+</html>
