@@ -13,6 +13,13 @@ return new class extends Migration
     {
         Schema::create('posts', function (Blueprint $table) {
             $table->id();
+            $table->text('content');
+            $table->string('author_name');
+            $table->string('image_path')->nullable();
+            $table->boolean('is_hoax')->default(false);
+            $table->text('explanation')->nullable();
+            $table->string('source_link')->nullable();
+            $table->string('category')->nullable();
             $table->timestamps();
         });
     }

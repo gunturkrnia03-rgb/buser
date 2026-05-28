@@ -22,7 +22,18 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
     ];
+
+    public function attempts()
+    {
+        return $this->hasMany(Attempt::class);
+    }
+
+    public function literacyScores()
+    {
+        return $this->hasMany(LiteracyScore::class);
+    }
 
     /**
      * The attributes that should be hidden for serialization.
